@@ -1,0 +1,85 @@
+@page "/report"
+
+<h3>Report</h3>
+
+<div class="container">
+    <p class="text-muted">Interactive report with simple filtering and sample data.</p>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input class="form-control" placeholder="Filter by name..." @bind="search" />
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-primary" @onclick="ApplyFilter">Apply</button>
+            <button class="btn btn-outline-secondary ms-2" @onclick="ResetFilter">Reset</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Filtered.Any())
+                {
+                    @foreach (var r in Filtered)
+                    {
+                        <tr>
+                            <td>@r.Date.ToShortDateString()</td>
+                            <td>@r.Name</td>
+                            <td class="text-end">@r.Amount.ToString("C")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="3" class="text-center text-muted">No records found.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private string search = string.Empty;
+    private List<ReportItem> items = new();
+
+    private IEnumerable<ReportItem> Filtered =>
+        string.IsNullOrWhiteSpace(search)
+            ? items
+            : items.Where(i => i.Name?.Contains(search, StringComparison.OrdinalIgnoreCase) == true);
+
+    protected override void OnInitialized()
+    {
+        // Sample data for the report - replace with real data/service later.
+        items = new List<ReportItem>
+        {
+            new ReportItem { Date = DateTime.Today.AddDays(-3), Name = "Alpha", Amount = 123.45m },
+            new ReportItem { Date = DateTime.Today.AddDays(-2), Name = "Beta", Amount = 678.90m },
+            new ReportItem { Date = DateTime.Today.AddDays(-1), Name = "Gamma", Amount = 50.00m },
+            new ReportItem { Date = DateTime.Today, Name = "Delta", Amount = 250.00m }
+        };
+    }
+
+    private void ApplyFilter()
+    {
+        // Binding already updates filtered results; method kept for button UX or analytics.
+    }
+
+    private void ResetFilter()
+    {
+        search = string.Empty;
+    }
+
+    private class ReportItem
+    {
+        public DateTime Date { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+    }
+}
